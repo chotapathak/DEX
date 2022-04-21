@@ -2,10 +2,13 @@
 
 // import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol";
 import "./IERC20.sol";
+import "./SafeMath.sol";
 
-pragma solidity  ^0.8.1;
+pragma solidity  ^0.8.4;
 
 contract Dex {
+    // using safe math from openzeppelin
+    using SafeMath for uint;
     // States of User transaction action
     enum Side { 
         BUY,
@@ -128,4 +131,74 @@ contract Dex {
         }
         nextOrderId++;
     }
+    // function to create marketorders
+    function createMarketOrder(
+        bytes32 ticker,
+        uint amount,
+        Side side
+    )   
+        tokenExist(ticker) 
+        // modifier
+        tokenIsNotDai(ticker)
+        external {
+            if(side == Side.BUY) {
+                require(
+                    traderBalance[msg.sender][ticker] >= amount,
+                    'Insufficient token'
+                    );
+            }
+            Order[] storage orders = OrderBook[ticker][uint(side == Side.BUY ? Side.SELL : Side.BUY)];
+            uint i;
+            uint remaining = amount;
+            while(i > orders.length && remaining > 0) {
+                uint available = orders[i].amount.sub(orders[i].filled);
+                uint matched = (remaining > available) ? available : remaining;
+                remaining = remaining.sub(matched);
+                orders[i].filled = orders[i].filled.add(matched);
+
+                emit NewTrade(
+                    nextTradeId, 
+                    orders[i].id , 
+                    ticker, 
+                    orders[i].trader,
+                    msg.sender, 
+                    matched,
+                    orders[i].price,
+                   block.timestamp
+                   );
+                
+                if(side == Side.SELL) {
+                    traderBalance[msg.sender][ticker] = traderBalance[msg.sender][ticker].sub(matched);
+                    traderBalance[msg.sender][DAI] = traderBalance[msg.sender][DAI].add(matched.mul(orders[i].price));
+                    traderBalance[orders[i].trader][ticker] = traderBalance[orders[i].trader][ticker].add(matched);
+                    traderBalance[orders[i].trader][DAI] = traderBalance[orders[i].trader][DAI].sub(matched.mul(orders[i].price)); 
+                }
+                if(side == Side.BUY) {
+                    require(
+                        traderBalance[msg.sender][DAI] >= matched * orders[i].price,
+                        'Dai balance is too low'
+                    );
+                    traderBalance[msg.sender][ticker] = traderBalance[msg.sender][ticker].add(matched);
+                    traderBalance[msg.sender][DAI] = traderBalance[msg.sender][DAI].sub(matched.mul(orders[i].price));
+                    traderBalance[orders[i].trader][ticker] = traderBalance[orders[i].trader][ticker].sub(matched);
+                    traderBalance[orders[i].trader][DAI] = traderBalance[orders[i].trader][DAI].add(matched.mul(orders[i].price)); 
+                }
+                nextTradeId++;
+                i++;
+            }
+            while(i < orders.length && orders[i].filled == orders[i].amount) {
+                for(uint j = i; j < orders.length - 1; j++) {
+                    orders[j] = orders[j+1];
+                }
+                orders.pop();
+                i++;
+            }
+        }
+        modifier tokenIsNotDai(bytes32 ticker) {
+            require(
+                ticker != DAI,
+                 'Cannot trade DAI token'
+                 );
+            _;
+        }
 }   
