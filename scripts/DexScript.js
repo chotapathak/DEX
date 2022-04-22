@@ -14,14 +14,32 @@ async function main() {
   // await hre.run('compile');
 
   // We get the contract to deploy
-  const [owner] = await ethers.getSigners();
+  const [owner] = await hre.ethers.getSigners();
   const Dex = await hre.ethers.getContractFactory("Dex");
-  const dex = await Dex.deploy();
+    let Dai = await hre.ethers.getContractFactory('DAI');
+    const Bat = await hre.ethers.getContractFactory('BAT');
+    const Xrp = await hre.ethers.getContractFactory('XRP');
+    const Shib = await hre.ethers.getContractFactory('SHIB');
+    // deploying with script
+    const dex = await Dex.deploy();
+    const dai = await Dai.deploy();
+    const bat = await Bat.deploy();
+    const xrp = await Xrp.deploy();
+    const shib = await Shib.deploy();
+    // wait untill deployed
+    await dex.deployed();
+    await dai.deployed();
+    await bat.deployed();
+    await xrp.deployed();
+    await shib.deployed();
 
-  await dex.deployed();
-
-  console.log("Dex deployed to:", dex.address);
-}
+    console.log("Dex deployed to:", dex.address);
+    console.log('DAI address => ', dai.address);
+    console.log('BAT address => ', bat.address);
+    console.log('XRP address => ', xrp.address);
+    console.log('SHIB address => ', shib.address);
+  
+  }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.

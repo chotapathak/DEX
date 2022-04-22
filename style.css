@@ -1,0 +1,73 @@
+
+*{
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+}
+body{
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;    
+}
+nav{
+    background : #0c0c0c;
+    height: 80px;
+    width: 100%;
+    align-items: center;
+}
+label.Brand{
+    color : #fff;
+    font-size : 35px;
+    line-height : 80px;
+    padding: 0 100px;
+}
+nav ul{
+    float: right;
+    margin-right: 40px;
+}
+nav li{
+    display : inline-block;
+    line-height : 80px;
+    margin : 0 8px;
+}
+.Dash li{
+    display : inline-block;
+    line-height : 80px;
+    margin : 0 8px;
+    align-items: center;
+}
+nav a{
+    color: white;
+    font-size: 18px;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    padding: 7px 10px;
+    border-radius: 3px;
+}
+a.dashboard{
+    border : 1px solid rgb(135, 215, 15);
+    transition: 0.9s;
+    border-bottom: 1.21px solid #00D395;
+    /* transition: padding 0.2s ease; */
+}
+a.wallet:hover{
+    border : 1px solid rgb(232, 152, 24);
+    transition: 0.9s;
+}
+a.Sell {
+    border : 1px solid rgb(230, 34, 8); 
+    padding: 1px 23px;
+} 
+a.Buy{
+    border : 1px solid rgb(128, 224, 19); 
+    padding: 1px 21px;
+} 
+div.Dash {
+    align-items: center;
+    margin-left: 33em;
+    padding-top: 6em;    
+}
+
+div.metamask {
+    margin-left: 35em;
+}
