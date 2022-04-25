@@ -4,7 +4,7 @@
 import "./IERC20.sol";
 import "./SafeMath.sol";
 
-pragma solidity  ^0.8.4;
+pragma solidity ^0.8.4;
 
 contract Dex {
     // using safe math from openzeppelin
@@ -12,7 +12,7 @@ contract Dex {
     // States of User transaction action
     enum Side { 
         BUY,
-        SELL
+        SELL        
     }
     // To add token
     struct Token {
@@ -63,7 +63,19 @@ contract Dex {
         tokens[ticker] = Token(ticker, tokenaddr);
         tokenList.push(ticker);
     }
-
+    // function to get Token already added
+    function getToken() external view returns (Token[] memory) 
+    {
+            Token[] memory _tokens = new Token[](tokenList.length);
+            for(uint i = 0; i < tokenList.length; i++)
+            {
+                _tokens[i] = Token(
+                    tokens[tokenList[i]].Ticker,
+                    tokens[tokenList[i]].tokenAddress
+                );
+            }
+            return _tokens;
+    }
     modifier onlyAdmin() {
         require(msg.sender == admin, 'you are not the owner');
         _;
@@ -82,6 +94,12 @@ contract Dex {
             IERC20(tokens[ticker].tokenAddress).transferFrom(
                 msg.sender, address(this), amount);
             traderBalance[msg.sender][ticker] += amount;
+    }
+    //function to get Balance
+    function getBalance(bytes32 ticker) external view returns (uint)
+    {
+        uint balance = traderBalance[msg.sender][ticker];
+        return balance;
     }
     function withdraw(uint amount , bytes32 ticker) 
         tokenExist(ticker)
@@ -130,6 +148,15 @@ contract Dex {
             i--;
         }
         nextOrderId++;
+    }
+
+    // function to get token
+    function getOrders(
+        bytes32 ticker,
+        Side side
+    ) external view returns (Order[] memory)
+    {
+        return OrderBook[ticker][uint(side)];
     }
     // function to create marketorders
     function createMarketOrder(
